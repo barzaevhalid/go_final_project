@@ -1,5 +1,11 @@
 package db
 
+import (
+	"database/sql"
+	"errors"
+	"fmt"
+)
+
 type Task struct {
 	ID      string `json:"id"`
 	Date    string `json:"date"`
@@ -55,4 +61,33 @@ func Tasks(limit int) ([]*Task, error) {
 		return make([]*Task, 0), nil
 	}
 	return tasks, nil
+}
+
+func GetTask(id string) (*Task, error) {
+	var task Task
+	err := DB.QueryRow("SELECT id, date, title, comment, repeat FROM scheduler WHERE id=$1", id).Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, err
+	}
+	return &task, nil
+}
+
+func UpdateTask(task *Task) error {
+
+	query := `UPDATE scheduler SET  title = $1, comment = $2, date = $3, repeat = $4
+			WHERE id=$5`
+	res, err := DB.Exec(query, task.Title, task.Comment, task.Date, task.Repeat, task.ID)
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf(`incorrect id for updating task`)
+	}
+	return nil
 }
