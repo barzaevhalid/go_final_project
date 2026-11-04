@@ -91,3 +91,39 @@ func UpdateTask(task *Task) error {
 	}
 	return nil
 }
+
+func DoneTask(id string) error {
+	task, err := GetTask(id)
+
+	if err != nil {
+		return err
+	}
+
+	if task.Repeat == "" {
+		err := DeleteTask(id)
+		return err
+
+	}
+	return err
+}
+
+func DeleteTask(id string) error {
+	result, err := DB.Exec("DELETE FROM scheduler WHERE id = $1", id)
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+
+}
+
+func UpdateDate(next string, id string) error {
+
+	_, err := DB.Exec("UPDATE scheduler SET date = $1 WHERE id = $2", next, id)
+	return err
+}

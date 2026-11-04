@@ -19,6 +19,7 @@ func UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, map[string]string{
 			"error": "wrong JSON",
 		})
+		return
 	}
 
 	if task.Title == "" {
@@ -34,8 +35,24 @@ func UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	if task.Date == "" {
 		task.Date = now.Format(apiDate)
 	}
+	_, err := time.Parse(apiDate, task.Date)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		writeJson(w, map[string]string{
+			"error": "wrong date",
+		})
+		return
+	}
+	_, err = NextDate(now, task.Date, task.Repeat)
+	if err != nil && task.Repeat != "" {
+		w.WriteHeader(http.StatusBadRequest)
+		writeJson(w, map[string]string{
+			"error": "wrong repeat",
+		})
+		return
+	}
 
-	err := db.UpdateTask(&task)
+	err = db.UpdateTask(&task)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			w.WriteHeader(http.StatusNotFound)
