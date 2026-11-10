@@ -6,6 +6,8 @@ import (
 	"github.com/barzaevhalid/go_final_project/pkg/api"
 )
 
+const port = "7540"
+
 func Start() error {
 	mux := http.NewServeMux()
 
@@ -13,6 +15,6 @@ func Start() error {
 
 	mux.Handle("/", http.FileServer(http.Dir("./web")))
 
-	return http.ListenAndServe(":7540", mux)
+	return http.ListenAndServe(":"+port, mux)
 
 }

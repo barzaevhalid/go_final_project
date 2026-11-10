@@ -21,14 +21,14 @@ var DB *sql.DB
 func Init(dbfile string) error {
 
 	dbFile := "scheduler.db"
-	_, err := os.Stat(dbfile)
+	_, err := os.Stat(dbFile)
 
 	var install bool
 	if err != nil {
 		install = true
 	}
 
-	DB, err = sql.Open("sqlite", dbFile)
+	DB, err = sql.Open("sqlite", dbfile)
 
 	if err != nil {
 		return err

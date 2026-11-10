@@ -16,17 +16,16 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		writeJson(w, map[string]string{
 			"error": "id is required",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 
 	task, err := db.GetTask(id)
 
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
 		writeJson(w, map[string]string{
 			"error": "Задача не найдена",
-		})
+		}, http.StatusNotFound)
 		return
 	}
 
@@ -35,47 +34,45 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		next, err := NextDate(time.Now(), task.Date, task.Repeat)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
 			writeJson(w, map[string]string{
 				"error": err.Error(),
-			})
+			}, http.StatusBadRequest)
 			return
 		}
 		err = db.UpdateDate(next, id)
 	}
 
-	writeJson(w, map[string]string{})
+	writeJson(w, map[string]string{}, http.StatusOK)
 
 }
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
 		writeJson(w, map[string]string{
 			"error": "Не указан идентификатор",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 
 	err := db.DeleteTask(id)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		w.WriteHeader(http.StatusNotFound)
+
 		writeJson(w, map[string]string{
 			"error": "Задача не найдена",
-		})
+		}, http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+
 		writeJson(w, map[string]string{
 			"error": err.Error(),
-		})
+		}, http.StatusInternalServerError)
 		return
 	}
-	writeJson(w, map[string]string{})
+	writeJson(w, map[string]string{}, http.StatusOK)
 
 }
 

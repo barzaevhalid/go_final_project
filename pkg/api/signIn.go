@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -22,48 +21,48 @@ func SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(todo_password, "sect")
 	if todo_password == "" {
-		w.WriteHeader(http.StatusBadRequest)
+
 		writeJson(w, map[string]string{
 			"error": "Пароль не установлен",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 	err := json.NewDecoder(r.Body).Decode(&p)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+
 		writeJson(w, map[string]string{
 			"error": err.Error(),
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 
 	if p.Password == "" {
-		w.WriteHeader(http.StatusBadRequest)
+
 		writeJson(w, map[string]string{
 			"error": "Неверный пароль",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 	if p.Password != todo_password {
-		w.WriteHeader(http.StatusBadRequest)
+
 		writeJson(w, map[string]string{
 			"error": "Неверный пароль",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 	token, err := GenerateToken(p.Password)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+
 		writeJson(w, map[string]string{
 			"error": err.Error(),
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 
 	writeJson(w, map[string]string{
 		"token": token,
-	})
+	}, http.StatusOK)
 }
 
 func GenerateToken(password string) (string, error) {
@@ -72,7 +71,6 @@ func GenerateToken(password string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"pwd": passwordChecksum,
-		"exp": time.Now().Add(24 * time.Hour).Unix(),
 	}
 
 	token := jwt.NewWithClaims(
@@ -80,5 +78,6 @@ func GenerateToken(password string) (string, error) {
 		claims,
 	)
 
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	fmt.Println(os.Getenv("TODO_JWT_SECRET"), "123213123")
+	return token.SignedString([]byte(os.Getenv("TODO_JWT_SECRET")))
 }

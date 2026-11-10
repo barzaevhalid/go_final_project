@@ -17,10 +17,10 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		writeJson(w, map[string]string{
 			"error": err.Error(),
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 	writeJson(w, TasksResp{
 		Tasks: tasks,
-	})
+	}, http.StatusOK)
 }

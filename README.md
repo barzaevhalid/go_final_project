@@ -43,11 +43,11 @@ go mod download
 В корне проекта создай файл .env:
 
 TODO_PASSWORD=123
-JWT_SECRET=secret
+TODO_JWT_SECRET=secret
 
 TODO_PASSWORD — пароль для авторизации. Если переменная пустая, авторизация отключена.
 
-JWT_SECRET — секретный ключ для подписи JWT.
+TODO_JWT_SECRET — секретный ключ для подписи JWT.
 
 Для загрузки переменных из .env используется библиотека github.com/joho/godotenv.
 

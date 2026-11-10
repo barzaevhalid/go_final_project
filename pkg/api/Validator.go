@@ -9,7 +9,7 @@ import (
 
 func ValidateToken(tokenString string) (bool, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		return []byte(os.Getenv("TODO_JWT_SECRET")), nil
 	})
 
 	if err != nil {

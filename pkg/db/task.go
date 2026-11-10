@@ -70,6 +70,10 @@ func GetTask(id string) (*Task, error) {
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
+
+	if err != nil {
+		return nil, err
+	}
 	return &task, nil
 }
 

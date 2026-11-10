@@ -15,18 +15,18 @@ func UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	var task db.Task
 
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+
 		writeJson(w, map[string]string{
 			"error": "wrong JSON",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 
 	if task.Title == "" {
-		w.WriteHeader(http.StatusBadRequest)
+
 		writeJson(w, map[string]string{
 			"error": "title is required",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 
@@ -37,34 +37,34 @@ func UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	_, err := time.Parse(apiDate, task.Date)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+
 		writeJson(w, map[string]string{
 			"error": "wrong date",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 	_, err = NextDate(now, task.Date, task.Repeat)
 	if err != nil && task.Repeat != "" {
-		w.WriteHeader(http.StatusBadRequest)
 		writeJson(w, map[string]string{
 			"error": "wrong repeat",
-		})
+		}, http.StatusBadRequest)
 		return
 	}
 
 	err = db.UpdateTask(&task)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			w.WriteHeader(http.StatusNotFound)
+			writeJson(w, map[string]string{
+				"error": "task not found",
+			}, http.StatusNotFound)
 		} else {
-			w.WriteHeader(http.StatusInternalServerError)
+			writeJson(w, map[string]string{
+				"error": "internal server error",
+			}, http.StatusInternalServerError)
 		}
-
-		writeJson(w, map[string]string{
-			"error": err.Error(),
-		})
 		return
 	}
-	writeJson(w, map[string]string{})
+
+	writeJson(w, map[string]string{}, http.StatusOK)
 
 }
