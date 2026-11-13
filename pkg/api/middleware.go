@@ -2,14 +2,13 @@ package api
 
 import (
 	"net/http"
-	"os"
 )
 
 func auth(next http.HandlerFunc) http.HandlerFunc {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		pass := os.Getenv("TODO_PASSWORD")
+		pass := Cfg.TODO_PASSWORD
 		if len(pass) > 0 {
 			var jwt string
 

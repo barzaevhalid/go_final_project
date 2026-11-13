@@ -10,14 +10,21 @@ type TasksResp struct {
 	Tasks []*db.Task `json:"tasks"`
 }
 
+const limit = 50
+
 func tasksHandler(w http.ResponseWriter, r *http.Request) {
-	tasks, err := db.Tasks(50)
+
+	if r.Method != http.MethodGet {
+		writeJson(w, map[string]string{
+			"error": "invalid method",
+		}, http.StatusMethodNotAllowed)
+	}
+	tasks, err := db.Tasks(limit)
 	if err != nil {
 
-		w.WriteHeader(http.StatusBadRequest)
 		writeJson(w, map[string]string{
 			"error": err.Error(),
-		}, http.StatusBadRequest)
+		}, http.StatusInternalServerError)
 		return
 	}
 	writeJson(w, TasksResp{

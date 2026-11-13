@@ -75,11 +75,11 @@ func writeJson(w http.ResponseWriter, data any, status int) {
 	jsonData, err := json.Marshal(data)
 
 	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(status)
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
+	w.WriteHeader(status)
 	w.Write(jsonData)
-
 }

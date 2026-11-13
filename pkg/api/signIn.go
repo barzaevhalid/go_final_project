@@ -4,9 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -16,21 +14,23 @@ type UserPassword struct {
 }
 
 func SignInHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		writeJson(w, "method not allowd", http.StatusMethodNotAllowed)
+	}
+
 	var p UserPassword
-	todo_password := os.Getenv("TODO_PASSWORD")
+	todo_password := Cfg.TODO_PASSWORD
 
-	fmt.Println(todo_password, "sect")
 	if todo_password == "" {
-
 		writeJson(w, map[string]string{
 			"error": "Пароль не установлен",
 		}, http.StatusBadRequest)
 		return
 	}
+
 	err := json.NewDecoder(r.Body).Decode(&p)
-
 	if err != nil {
-
 		writeJson(w, map[string]string{
 			"error": err.Error(),
 		}, http.StatusBadRequest)
@@ -38,19 +38,19 @@ func SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if p.Password == "" {
-
 		writeJson(w, map[string]string{
 			"error": "Неверный пароль",
 		}, http.StatusBadRequest)
 		return
 	}
+
 	if p.Password != todo_password {
-
 		writeJson(w, map[string]string{
 			"error": "Неверный пароль",
 		}, http.StatusBadRequest)
 		return
 	}
+
 	token, err := GenerateToken(p.Password)
 	if err != nil {
 
@@ -78,6 +78,5 @@ func GenerateToken(password string) (string, error) {
 		claims,
 	)
 
-	fmt.Println(os.Getenv("TODO_JWT_SECRET"), "123213123")
-	return token.SignedString([]byte(os.Getenv("TODO_JWT_SECRET")))
+	return token.SignedString([]byte(Cfg.TODO_JWT_SECRET))
 }

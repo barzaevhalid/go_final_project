@@ -19,24 +19,20 @@ ON scheduler(date);`
 var DB *sql.DB
 
 func Init(dbfile string) error {
-
-	dbFile := "scheduler.db"
-	_, err := os.Stat(dbFile)
-
-	var install bool
-	if err != nil {
-		install = true
+	_, err := os.Stat(dbfile)
+	if err != nil && !os.IsNotExist(err) {
+		return err
 	}
 
-	DB, err = sql.Open("sqlite", dbfile)
+	install := os.IsNotExist(err)
 
+	DB, err = sql.Open("sqlite", dbfile)
 	if err != nil {
 		return err
 	}
 
 	if install {
 		_, err = DB.Exec(schema)
-
 		if err != nil {
 			DB.Close()
 			DB = nil

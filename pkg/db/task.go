@@ -2,8 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"errors"
-	"fmt"
 )
 
 type Task struct {
@@ -67,10 +65,6 @@ func GetTask(id string) (*Task, error) {
 	var task Task
 	err := DB.QueryRow("SELECT id, date, title, comment, repeat FROM scheduler WHERE id=$1", id).Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, err
-	}
-
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +84,9 @@ func UpdateTask(task *Task) error {
 	if err != nil {
 		return err
 	}
+
 	if count == 0 {
-		return fmt.Errorf(`incorrect id for updating task`)
+		return sql.ErrNoRows
 	}
 	return nil
 }
@@ -113,6 +108,11 @@ func DoneTask(id string) error {
 
 func DeleteTask(id string) error {
 	result, err := DB.Exec("DELETE FROM scheduler WHERE id = $1", id)
+
+	if err != nil {
+		return err
+	}
+
 	rows, err := result.RowsAffected()
 	if err != nil {
 		return err

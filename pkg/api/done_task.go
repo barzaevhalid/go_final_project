@@ -13,7 +13,6 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
 		writeJson(w, map[string]string{
 			"error": "id is required",
 		}, http.StatusBadRequest)
@@ -30,7 +29,15 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if task.Repeat == "" {
+
 		err = db.DeleteTask(id)
+		if err != nil {
+			writeJson(w, map[string]string{
+				"error": "internal server error",
+			}, http.StatusInternalServerError)
+			return
+		}
+
 	} else {
 		next, err := NextDate(time.Now(), task.Date, task.Repeat)
 		if err != nil {
@@ -39,11 +46,17 @@ func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
 			}, http.StatusBadRequest)
 			return
 		}
+
 		err = db.UpdateDate(next, id)
+		if err != nil {
+			writeJson(w, map[string]string{
+				"error": "internal server error",
+			}, http.StatusInternalServerError)
+			return
+		}
 	}
 
 	writeJson(w, map[string]string{}, http.StatusOK)
-
 }
 func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
@@ -81,8 +94,8 @@ func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodPost:
 		updateTaskHandler(w, r)
-	case http.MethodDelete:
-		deleteTaskHandler(w, r)
+	default:
+		writeJson(w, "method not allowd", http.StatusMethodNotAllowed)
 	}
 
 }
